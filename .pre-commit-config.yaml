@@ -21,8 +21,8 @@ repos:
     rev: "v1.3.0"
     hooks:
       - id: mypy
-        args: [--strict, --ignore-missing-imports]
-        additional_dependencies: [fastapi]
+        args: [--strict, --ignore-missing-imports, --no-warn-unused-ignores]
+        additional_dependencies: [fastapi, pytest]
 
   - repo: https://github.com/compilerla/conventional-pre-commit
     rev: v2.3.0
