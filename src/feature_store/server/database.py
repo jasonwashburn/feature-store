@@ -5,6 +5,7 @@ import os
 import pymongo
 from beanie import Document, init_beanie
 from motor.motor_asyncio import AsyncIOMotorClient
+from pydantic import BaseModel
 
 from feature_store.server.models.geojson import (
     GeoJsonLineString,
@@ -40,6 +41,20 @@ class DBFeature(Document):
         indexes = [
             [("geometry", pymongo.GEOSPHERE)],
         ]
+
+
+class UpdateDBFeature(BaseModel):
+    """Implements a Feature model."""
+
+    geojson_type: GeoJSONType | None
+    geometry: GeoJsonPoint | GeoJsonPolygon | GeoJsonLineString | None
+    properties: dict[str, str] | None
+
+    class Config:
+        """Configures the Feature model."""
+
+        fields = {"geojson_type": "type"}
+        allow_population_by_field_name = True
 
 
 async def init_db() -> None:

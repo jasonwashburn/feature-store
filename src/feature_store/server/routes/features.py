@@ -1,9 +1,11 @@
 """Implementation of the features endpoint."""
+
+
 from beanie import PydanticObjectId
 from fastapi import HTTPException
 from fastapi.routing import APIRouter
 
-from feature_store.server.database import DBFeature
+from feature_store.server.database import DBFeature, UpdateDBFeature
 
 router = APIRouter()
 
@@ -59,6 +61,44 @@ async def get_feature_by_id(feature_id: PydanticObjectId) -> DBFeature:
             detail=f"Feture id: {feature_id} not found!",
         )
     return result
+
+
+@router.put("/{feature_id}", response_description="Feature updated")
+async def update_feature(
+    feature_id: PydanticObjectId,
+    update: UpdateDBFeature,
+) -> DBFeature:
+    """Updates a feature by id.
+
+    Args:
+        feature_id (PydanticObjectId): The id of the feature to update.
+        update (UpdateDBFeature): The update to apply to the feature.
+
+    Raises:
+        HTTPException: If the feature is not found.
+
+    Returns:
+        DBFeature: The feature.
+    """
+    updates = update.dict(exclude_unset=True, by_alias=True)
+    update_query = {"$set": updates}
+
+    record = await DBFeature.get(feature_id)
+    if not record:
+        raise HTTPException(
+            status_code=404,
+            detail="Feature not found!",
+        )
+
+    await record.update(update_query)
+    updated_record = await DBFeature.get(feature_id)
+    if updated_record is None:
+        raise HTTPException(
+            status_code=500,
+            detail="Something went wrong when updating the feature!",
+        )
+
+    return updated_record
 
 
 @router.delete(

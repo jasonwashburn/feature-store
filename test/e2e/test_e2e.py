@@ -42,11 +42,24 @@ def test_post_multiple_geojson_features() -> None:
 
 @pytest.mark.e2e()
 @pytest.mark.timeout(5)
+def test_put_feature() -> None:
+    """Tests you can update a feature."""
+    feature_id = inserted_ids[0]
+
+    with httpx.Client(base_url=HOST) as client:
+        update = {"properties": {"name": "Updated Feature"}}
+        result = client.put(f"{FEATURES_ROUTE}{feature_id}", json=update)
+        assert result.status_code == 200
+        assert result.json()["properties"]["name"] == "Updated Feature"
+
+
+@pytest.mark.e2e()
+@pytest.mark.timeout(5)
 def test_delete_inserted_features() -> None:
     """Tests you can delete the inserted features."""
     with httpx.Client(base_url=HOST) as client:
         for feature_id in inserted_ids:
-            result = client.delete(f"/features/{feature_id}")
+            result = client.delete(f"{FEATURES_ROUTE}{feature_id}")
             assert result.status_code == 200
             assert result.json() == {"message": f"Feature id: {feature_id} deleted!"}
 
