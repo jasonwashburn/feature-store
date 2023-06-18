@@ -22,7 +22,7 @@ repos:
     hooks:
       - id: mypy
         args: [--strict, --ignore-missing-imports, --no-warn-unused-ignores]
-        additional_dependencies: [fastapi, pytest, beanie]
+        additional_dependencies: [fastapi, pytest, beanie, pytest-asyncio]
 
   - repo: https://github.com/compilerla/conventional-pre-commit
     rev: v2.3.0
