@@ -25,12 +25,11 @@ class Geometry(BaseModel):
     geometry_type: GeometryType
     coordinates: list[list[list[float]]]
 
-    def to_dict(self) -> dict[str, list[list[list[float]]] | str]:
-        """Converts the Geometry to a dictionary."""
-        return {
-            "type": self.geometry_type.value,
-            "coordinates": self.coordinates,
-        }
+    class Config:
+        """Configures the Geometry model."""
+
+        fields = {"geometry_type": "type"}
+        allow_population_by_field_name = True
 
 
 class Feature(BaseModel):
@@ -40,15 +39,12 @@ class Feature(BaseModel):
     geometry: Geometry
     properties: dict[str, str]
 
-    def to_dict(
-        self,
-    ) -> dict[str, object]:
-        """Converts the Feature to a dictionary."""
-        return {
-            "type": self.geojson_type.value,
-            "geometry": self.geometry.to_dict(),
-            "properties": self.properties,
-        }
+    class Config:
+        """Configures the Feature model."""
+
+        fields = {"geojson_type": "type"}
+
+        allow_population_by_field_name = True
 
 
 class FeatureCollection(BaseModel):
@@ -57,9 +53,8 @@ class FeatureCollection(BaseModel):
     geojson_type: GeoJSONType = Field(default=GeoJSONType.FEATURE_COLLECTION)
     features: list[Feature]
 
-    def to_dict(self) -> dict[str, object]:
-        """Converts the FeatureCollection to a dictionary."""
-        return {
-            "type": self.geojson_type.value,
-            "features": [feature.to_dict() for feature in self.features],
-        }
+    class Config:
+        """Configures the Feature Collection model."""
+
+        fields = {"geojson_type": "type"}
+        allow_population_by_field_name = True

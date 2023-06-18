@@ -1,4 +1,6 @@
 """Implements tests for GeoJSON models."""
+import json
+
 import pytest
 from pydantic import ValidationError
 
@@ -60,56 +62,47 @@ def test_feature_collection_rejects_invalid_geojson_type(
 
 def test_feature_collection_outputs_valid_geojson(polygon_feature: Feature) -> None:
     """Tests FeatureCollection outputs valid GeoJSON."""
-    expected_geojson = {
-        "type": "FeatureCollection",
-        "features": [
-            {
-                "type": "Feature",
-                "geometry": {
-                    "type": "Polygon",
-                    "coordinates": [
-                        [
+    expected = json.dumps(
+        {
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [
                             [
-                                -10,
-                                -10,
-                            ],
-                            [
-                                10,
-                                -10,
-                            ],
-                            [
-                                10,
-                                10,
-                            ],
-                            [-10, 10],
-                            [
-                                -10,
-                                -10,
+                                [
+                                    -10.0,
+                                    -10.0,
+                                ],
+                                [
+                                    10.0,
+                                    -10.0,
+                                ],
+                                [
+                                    10.0,
+                                    10.0,
+                                ],
+                                [
+                                    -10.0,
+                                    10.0,
+                                ],
+                                [
+                                    -10.0,
+                                    -10.0,
+                                ],
                             ],
                         ],
-                    ],
+                    },
+                    "properties": {},
                 },
-                "properties": {},
-            },
-        ],
-    }
-    assert (
-        FeatureCollection(
-            geojson_type=GeoJSONType.FEATURE_COLLECTION,
-            features=[polygon_feature],
-        ).to_dict()
-        == expected_geojson
+            ],
+        },
     )
+    actual = FeatureCollection(
+        geojson_type=GeoJSONType.FEATURE_COLLECTION,
+        features=[polygon_feature],
+    ).json(by_alias=True)
 
-
-def test_feature_collection_to_dict_outputs_geojson_type_as_type(
-    polygon_feature: Feature,
-) -> None:
-    """Tests FeatureCollection.to_dict() outputs valid GeoJSON type."""
-    assert (
-        FeatureCollection(
-            geojson_type=GeoJSONType.FEATURE_COLLECTION,
-            features=[polygon_feature],
-        ).to_dict()["type"]
-        == "FeatureCollection"
-    )
+    assert actual == expected
