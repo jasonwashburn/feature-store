@@ -2,6 +2,7 @@
 
 import os
 
+import pymongo
 from beanie import Document, init_beanie
 from motor.motor_asyncio import AsyncIOMotorClient
 
@@ -31,6 +32,9 @@ class DBFeature(Document):
         """Configures the database settings."""
 
         name = "features"
+        indexes = [
+            [("geometry", pymongo.GEOSPHERE)],
+        ]
 
 
 async def init_db() -> None:
