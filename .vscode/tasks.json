@@ -8,6 +8,12 @@
             "type": "shell",
             "command": "poetry run pre-commit run --all-files",
             "problemMatcher": []
+        },
+        {
+            "label": "recyle mongodb",
+            "type": "shell",
+            "command": "docker compose down -v && docker compose up -d",
+            "problemMatcher": []
         }
     ]
 }
