@@ -1,19 +1,21 @@
 """Implements tests for the features endpoint."""
+
 from fastapi.testclient import TestClient
 
 from feature_store.server.app import app
 
 client = TestClient(app)
+FEATURES_ROUTE = "/features"
 
 
 def test_get_features() -> None:
     """Tests the features endpoint."""
-    result = client.get("/features")
+    result = client.get(FEATURES_ROUTE)
     assert result.status_code == 404
     assert result.json() == {"detail": "No features found!"}
 
 
-def test_put_features() -> None:
+def test_put_feature() -> None:
     """Tests the features endpoint."""
     feature = {
         "type": "Feature",
@@ -36,8 +38,23 @@ def test_put_features() -> None:
             "type": "LineString",
         },
     }
-    result = client.post("/features", json=feature)
+    result = client.post(FEATURES_ROUTE, json=feature)
     assert result.status_code == 200
     for key in feature:
         assert result.json()[key] == feature[key]
     assert result.json()["_id"] is not None
+
+
+def test_put_then_delete_multiple_features(geojson_features: dict[str, object]) -> None:
+    """Inserts multiple features, then deletes them."""
+    inserted_feature_ids = []
+    for feature in geojson_features:
+        insert_result = client.post(FEATURES_ROUTE, json=feature)
+        assert insert_result.status_code == 200
+        assert insert_result.json()["_id"] is not None
+        inserted_feature_ids.append(insert_result.json()["_id"])
+
+    for feature_id in inserted_feature_ids:
+        delete_result = client.delete(f"{FEATURES_ROUTE}/{feature_id}")
+        assert delete_result.status_code == 200
+        assert delete_result.json() == {"message": f"Feature id: {feature_id} deleted!"}

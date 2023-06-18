@@ -1,4 +1,8 @@
 """Test configuration for pytest."""
+import json
+from pathlib import Path
+from typing import Any
+
 import pytest
 import pytest_asyncio
 from beanie import init_beanie
@@ -33,3 +37,12 @@ def pytest_collection_modifyitems(
     for item in items:
         if "e2e" in item.keywords:
             item.add_marker(skip_e2e)
+
+
+@pytest.fixture(scope="session")
+def geojson_features() -> dict[str, object] | Any:
+    """Test fixture for geojson features."""
+    test_feature_file = Path("test/data/test_features.json")
+    with test_feature_file.open() as f:
+        geojson = json.load(f)
+    return geojson["features"]

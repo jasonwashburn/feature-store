@@ -14,6 +14,12 @@
             "type": "shell",
             "command": "docker compose down -v && docker compose up -d",
             "problemMatcher": []
-        }
+        },
+        {
+            "label": "run e2e tests",
+            "type": "shell",
+            "command": "poetry run pytest --e2e",
+            "problemMatcher": []
+        },
     ]
 }
