@@ -19,16 +19,42 @@ class GeometryType(str, Enum):
     POLYGON = "Polygon"
 
 
-class Geometry(BaseModel):
-    """Implements a Geometry model."""
+class GeoJsonPoint(BaseModel):
+    """Represents a GeoJSON Point."""
 
-    geometry_type: GeometryType
+    geo_type: str = "Point"
+    coordinates: list[float]
+
+    class Config:
+        """Configures the GeoJSON Point model."""
+
+        fields = {"geo_type": "type"}
+        allow_population_by_field_name = True
+
+
+class GeoJsonLineString(BaseModel):
+    """Represents a GeoJSON LineString."""
+
+    geo_type: str = "LineString"
+    coordinates: list[list[float]]
+
+    class Config:
+        """Configures the GeoJSON Point model."""
+
+        fields = {"geo_type": "type"}
+        allow_population_by_field_name = True
+
+
+class GeoJsonPolygon(BaseModel):
+    """Represents a GeoJSON Polygon."""
+
+    geo_type: str = "Polygon"
     coordinates: list[list[list[float]]]
 
     class Config:
-        """Configures the Geometry model."""
+        """Configures the GeoJSON Point model."""
 
-        fields = {"geometry_type": "type"}
+        fields = {"geo_type": "type"}
         allow_population_by_field_name = True
 
 
@@ -36,7 +62,7 @@ class Feature(BaseModel):
     """Implements a Feature model."""
 
     geojson_type: GeoJSONType = Field(default=GeoJSONType.FEATURE)
-    geometry: Geometry
+    geometry: GeoJsonLineString | GeoJsonPoint | GeoJsonPolygon
     properties: dict[str, str]
 
     class Config:

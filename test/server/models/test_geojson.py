@@ -7,9 +7,8 @@ from pydantic import ValidationError
 from feature_store.server.models.geojson import (
     Feature,
     FeatureCollection,
+    GeoJsonPolygon,
     GeoJSONType,
-    Geometry,
-    GeometryType,
 )
 
 
@@ -22,8 +21,7 @@ def polygon_feature() -> Feature:
     """
     return Feature(
         geojson_type=GeoJSONType.FEATURE,
-        geometry=Geometry(
-            geometry_type=GeometryType.POLYGON,
+        geometry=GeoJsonPolygon(
             coordinates=[
                 [
                     [-10.0, -10.0],

@@ -6,7 +6,12 @@ import pymongo
 from beanie import Document, init_beanie
 from motor.motor_asyncio import AsyncIOMotorClient
 
-from feature_store.server.models.geojson import GeoJSONType, Geometry
+from feature_store.server.models.geojson import (
+    GeoJsonLineString,
+    GeoJsonPoint,
+    GeoJsonPolygon,
+    GeoJSONType,
+)
 
 mongo_username = os.getenv("MONGODB_USERNAME")
 mongo_password = os.getenv("MONGODB_PASSWORD")
@@ -18,7 +23,7 @@ class DBFeature(Document):
     """Implements a Feature model."""
 
     geojson_type: GeoJSONType
-    geometry: Geometry
+    geometry: GeoJsonPoint | GeoJsonPolygon | GeoJsonLineString
     properties: dict[str, str]
 
     class Config:
