@@ -55,6 +55,36 @@ def test_put_feature() -> None:
 
 @pytest.mark.e2e()
 @pytest.mark.timeout(5)
+def test_get_geo_intersects(
+    geospatial_query_features: dict[str, str | dict[str, object]],
+) -> None:
+    """Tests you can query for features that intersect a polygon."""
+    geospatial_test_feature_ids = []
+    with httpx.Client(base_url=HOST) as client:
+        for key in ["point", "line", "box"]:
+            feature = geospatial_query_features.get(key)
+            insert_result = client.post(FEATURES_ROUTE, json=feature)
+            assert insert_result.status_code == 200
+            assert insert_result.json()["_id"] is not None
+            inserted_ids.append(insert_result.json()["_id"])
+            geospatial_test_feature_ids.append(insert_result.json()["_id"])
+
+    polygon = geospatial_query_features.get("outer-box").get("geometry")  # type: ignore
+
+    with httpx.Client(base_url=HOST) as client:
+        result = client.post(
+            f"{FEATURES_ROUTE}geospatial/intersects",
+            json=polygon,
+        )
+        assert result.status_code == 200
+        assert len(result.json()) == 3
+        assert all(
+            feature["_id"] in geospatial_test_feature_ids for feature in result.json()
+        )
+
+
+@pytest.mark.e2e()
+@pytest.mark.timeout(5)
 def test_delete_inserted_features() -> None:
     """Tests you can delete the inserted features."""
     with httpx.Client(base_url=HOST) as client:

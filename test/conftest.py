@@ -46,3 +46,17 @@ def geojson_features() -> dict[str, object] | Any:
     with test_feature_file.open() as f:
         geojson = json.load(f)
     return geojson["features"]
+
+
+@pytest.fixture(scope="session")
+def geospatial_query_features() -> dict[str, object] | Any:
+    """Test fixture for geojson features."""
+    test_feature_file = Path("test/data/geospatial-search.json")
+    with test_feature_file.open() as f:
+        geojson = json.load(f)
+
+    features = {}
+    for feature in geojson["features"]:
+        features[feature["properties"]["featureTest"]] = feature
+
+    return features

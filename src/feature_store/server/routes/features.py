@@ -6,6 +6,7 @@ from fastapi import HTTPException
 from fastapi.routing import APIRouter
 
 from feature_store.server.database import DBFeature, UpdateDBFeature
+from feature_store.server.models.geojson import GeoJsonPolygon
 
 router = APIRouter()
 
@@ -135,3 +136,28 @@ async def delete_feature_by_id(feature_id: PydanticObjectId) -> dict[str, str]:
         )
 
     return {"message": f"Feature id: {feature_id} deleted!"}
+
+
+@router.post("/geospatial/intersects")
+async def get_features_by_intersects(geometry: GeoJsonPolygon) -> list[DBFeature]:
+    """Returns all features that intersect with the given bounding box.
+
+    Args:
+        geometry (GeoJsonPolygon): The bounding box to use for the intersection.
+
+    Raises:
+        HTTPException: If no features are found.
+
+    Returns:
+        list[DBFeature]: A list of features.
+    """
+    result = await DBFeature.find(
+        {"geometry": {"$geoIntersects": {"$geometry": geometry.dict(by_alias=True)}}},
+    ).to_list()
+    if not isinstance(result, list) or len(result) == 0:
+        raise HTTPException(
+            status_code=404,
+            detail="No features found!",
+        )
+
+    return result

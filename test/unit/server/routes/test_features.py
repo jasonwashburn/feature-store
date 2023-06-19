@@ -1,5 +1,6 @@
 """Implements tests for the features endpoint."""
 
+import pytest
 from fastapi.testclient import TestClient
 
 from feature_store.server.app import app
@@ -95,3 +96,26 @@ def test_post_then_update_feature(geojson_features: list[dict[str, object]]) -> 
         assert update_result.json()[key] == new_feature[key]
     assert update_result.json()["_id"] is not None
     assert update_result.json()["_id"] == feature_id
+
+
+@pytest.mark.xfail(reason="Not implemented in MongoMock yet")
+def test_get_geo_intersects(
+    geospatial_query_features: dict[str, str | dict[str, object]],
+) -> None:
+    """Tests the geospatial intersects endpoint.
+
+    Note: GeoSpatial queries are not supported by MongoMock yet.
+    """
+    for key in ["point", "line", "box"]:
+        feature = geospatial_query_features[key]
+        insert_result = client.post(FEATURES_ROUTE, json=feature)
+        assert insert_result.status_code == 200
+        assert insert_result.json()["_id"] is not None
+
+    polygon = geospatial_query_features["outer-box"]["geometry"]  # type: ignore
+    result = client.post(
+        f"{FEATURES_ROUTE}/geospatial/intersects/",
+        json=polygon,
+    )
+    assert result.status_code == 200
+    assert len(result.json()) == 2
